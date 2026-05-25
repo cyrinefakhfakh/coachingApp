@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0e17;
+  --foreground: #f9fafb;
+  --card-bg: #121824;
+  --card-border: #1e293b;
+  --accent: #ff5722;      /* Orange Néon */
+  --accent-hover: #e64a19;
+  --accent-neon: #d4ff00; /* Vert-Jaune Électrique */
+  
+  --font-sans: var(--font-geist-sans), Inter, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-font-mono);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(255, 87, 34, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(212, 255, 0, 0.03) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism Classes */
+.glass-card {
+  background: rgba(18, 24, 36, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.6);
+  border-radius: 1rem;
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 87, 34, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(255, 87, 34, 0.15);
+}
+
+.neon-border-orange {
+  border: 1px solid rgba(255, 87, 34, 0.4);
+  box-shadow: 0 0 15px rgba(255, 87, 34, 0.1);
+}
+
+.neon-border-neon {
+  border: 1px solid rgba(212, 255, 0, 0.4);
+  box-shadow: 0 0 15px rgba(212, 255, 0, 0.1);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-neon {
+  background: linear-gradient(135deg, #d4ff00 0%, #a3e635 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Scrollbar for modern fitness look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e17;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5722;
+}
+
+/* Custom Checkbox */
+.custom-checkbox {
+  appearance: none;
+  background-color: rgba(30, 41, 59, 0.5);
+  border: 2px solid #334155;
+  padding: 9px;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-checkbox:checked {
+  background-color: #ff5722;
+  border-color: #ff5722;
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.4);
+}
+
+.custom-checkbox:checked::after {
+  content: '✔';
+  font-size: 12px;
+  color: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

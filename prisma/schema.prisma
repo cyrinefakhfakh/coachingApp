@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // For local development: provider = "sqlite"  and DATABASE_URL="file:./dev.db"
+  // For production (Vercel + Neon): provider = "postgresql" and DATABASE_URL=<neon_url>
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl is needed for Neon serverless (connection pooling)
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   // 'coach' or 'client'
+  // Additional client fields
+  gender    String?  // 'male', 'female', 'other'
+  weight    Float?   // in kg
+  height    Float?   // in cm
+  age       Int?
+  goal      String?  // 'weight_loss', 'muscle_gain', 'maintenance', etc.
+  experience String? // 'beginner', 'intermediate', 'advanced'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  programs        Program[]        // Programs created by coach
+  userPrograms    UserProgram[]    // Programs assigned to user
+  workoutSessions WorkoutSession[] // Workouts completed by user
+}
+
+model Exercise {
+  id           String @id @default(cuid())
+  name         String
+  description  String?
+  muscleGroup  String
+  equipment    String?
+  instructions String?
+  imageUrl     String? // URL de l'image de l'exercice
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  programExercises ProgramExercise[]
+  loggedExercises  LoggedExercise[]
+}
+
+model Program {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  coachId     String
+  coach       User   @relation(fields: [coachId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  exercises       ProgramExercise[]
+  userPrograms    UserProgram[]
+  workoutSessions WorkoutSession[]
+}
+
+model ProgramExercise {
+  id         String @id @default(cuid())
+  programId  String
+  exerciseId String
+  sets       Int
+  reps       Int
+  restTime   Int? // in seconds
+  notes      String?
+
+  program  Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([programId, exerciseId])
+}
+
+model UserProgram {
+  id        String   @id @default(cuid())
+  userId    String
+  programId String
+  assignedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id])
+
+  @@unique([userId, programId])
+}
+
+model WorkoutSession {
+  id          String   @id @default(cuid())
+  userId      String
+  programId   String
+  startedAt   DateTime @default(now())
+  completedAt DateTime @default(now())
+  duration    Int      // Duration of workout in minutes
+  notes       String?
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program         Program          @relation(fields: [programId], references: [id])
+  loggedExercises LoggedExercise[]
+}
+
+model LoggedExercise {
+  id               String @id @default(cuid())
+  workoutSessionId String
+  exerciseId       String
+
+  workoutSession WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  exercise       Exercise       @relation(fields: [exerciseId], references: [id])
+  loggedSets     LoggedSet[]
+}
+
+model LoggedSet {
+  id               String   @id @default(cuid())
+  loggedExerciseId String
+  setIndex         Int      // Set number (1, 2, 3, etc.)
+  weight           Float?   // Weight in kg
+  reps             Int?     // Repetitions performed
+  completed        Boolean  @default(true)
+
+  loggedExercise LoggedExercise @relation(fields: [loggedExerciseId], references: [id], onDelete: Cascade)
+}
+
