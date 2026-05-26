@@ -53,6 +53,16 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // --- Auto-upgrade (self-healing) vers le rôle coach si l'email correspond à COACH_EMAIL ---
+        const coachEmail = process.env.COACH_EMAIL
+        if (coachEmail && user.email.toLowerCase() === coachEmail.toLowerCase() && user.role !== 'coach') {
+          const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'coach' }
+          })
+          user.role = updatedUser.role
+        }
+
         return {
           id: user.id,
           email: user.email,

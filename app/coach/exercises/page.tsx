@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ExercisesManager from '../../../components/ExercisesManager'
+import Link from 'next/link'
 
 export default async function ExercisesPage() {
   const session = await getServerSession(authOptions)
@@ -11,25 +12,32 @@ export default async function ExercisesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Gestion des Exercices</h1>
-            <a
-              href="/coach"
-              className="text-indigo-600 hover:text-indigo-500"
-            >
-              Retour à l'espace coach
-            </a>
-          </div>
+    <div style={{ minHeight: '100vh', padding: '2.5rem 1rem' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        
+        {/* Navigation / Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <Link 
+            href="/coach" 
+            style={{ 
+              color: '#94a3b8', 
+              textDecoration: 'none', 
+              fontSize: '0.875rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.4rem',
+              transition: 'color 0.2s'
+            }}
+          >
+            ← Espace Coach
+          </Link>
+          <span style={{ color: '#334155' }}>|</span>
+          <span style={{ color: '#64748b', fontSize: '0.875rem' }}>Gestion des Exercices</span>
         </div>
-      </header>
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <ExercisesManager />
-        </div>
-      </main>
+
+        {/* Exercises Manager */}
+        <ExercisesManager />
+      </div>
     </div>
   )
 }

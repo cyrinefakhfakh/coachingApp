@@ -7,6 +7,7 @@ interface UserProfile {
   id: string
   name?: string
   email: string
+  role?: string
   gender?: string
   weight?: number
   height?: number
@@ -39,7 +40,7 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
         const data = await response.json()
         setProfile(data)
       } else if (response.status === 401) {
-        setError('Vous n\'êtes pas autorisé à accéder à ce profil.')
+        setError("Vous n'êtes pas autorisé à accéder à ce profil.")
       } else if (response.status === 404) {
         setError('Profil non trouvé.')
       } else {
@@ -69,7 +70,8 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
 
       if (response.ok) {
         setMessage('Profil mis à jour avec succès !')
-        setTimeout(() => router.push('/dashboard'), 2000)
+        const isCoach = profile?.role?.toLowerCase() === 'coach'
+        setTimeout(() => router.push(isCoach ? '/coach' : '/dashboard'), 2000)
       } else {
         setMessage('Erreur lors de la mise à jour du profil')
       }
@@ -85,76 +87,101 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
   }
 
   if (loading) {
-    return <div className="text-center">Chargement...</div>
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#ff5722]"></div>
+        <span className="ml-3 text-gray-400 font-medium">Chargement du profil...</span>
+      </div>
+    )
   }
 
   if (error) {
     return (
-      <div className="text-center">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                Erreur de chargement
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-              </div>
-              <div className="mt-4">
-                <button
-                  onClick={fetchProfile}
-                  className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Réessayer
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="glass-card neon-border-orange p-6 text-center">
+          <svg className="h-12 w-12 text-[#ff5722] mx-auto mb-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          <h3 className="text-lg font-bold text-white mb-2">Erreur de chargement</h3>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <button
+            onClick={fetchProfile}
+            className="px-5 py-2.5 bg-[#ff5722] text-white font-semibold rounded-lg hover:bg-[#e64a19] transition-all"
+          >
+            Réessayer
+          </button>
         </div>
       </div>
     )
   }
 
   if (!profile) {
-    return <div className="text-center">Erreur lors du chargement du profil</div>
+    return (
+      <div className="max-w-2xl mx-auto text-center text-gray-400 py-8">
+        Erreur lors du chargement du profil
+      </div>
+    )
   }
 
+  const isCoach = profile.role?.toLowerCase() === 'coach'
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:p-6">
-          <div className="md:grid md:grid-cols-3 md:gap-6">
-            <div className="md:col-span-1">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
-                Informations personnelles
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Renseignez vos informations pour un coaching personnalisé.
+        <div className="glass-card p-6 md:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-6 border-b border-[#1e293b]">
+            <div>
+              <h3 className="text-xl font-bold text-white">Mon Profil</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Gérez vos informations de compte {isCoach ? 'coach' : 'athlète'}.
               </p>
             </div>
-            <div className="mt-5 md:mt-0 md:col-span-2">
-              <div className="grid grid-cols-6 gap-6">
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Nom complet
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    value={profile.name || ''}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-3 py-2 border"
-                  />
-                </div>
+            {isCoach ? (
+              <span className="self-start sm:self-center inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                👑 COACH PRINCIPAL
+              </span>
+            ) : (
+              <span className="self-start sm:self-center inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-[#d4ff00]/10 text-[#d4ff00] border border-[#d4ff00]/30 shadow-[0_0_10px_rgba(212,255,0,0.1)]">
+                💪 ATHLÈTE
+              </span>
+            )}
+          </div>
 
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-2">
+                Adresse Email (Non modifiable)
+              </label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                disabled
+                value={profile.email}
+                className="w-full bg-[#080c14] border border-[#1e293b] text-gray-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none cursor-not-allowed"
+              />
+            </div>
+
+            <div className={isCoach ? "sm:col-span-2" : "sm:col-span-1"}>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-2">
+                Nom complet
+              </label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                required
+                value={profile.name || ''}
+                onChange={(e) => handleChange('name', e.target.value)}
+                className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] focus:ring-1 focus:ring-[#ff5722] transition-colors"
+                placeholder="Votre nom"
+              />
+            </div>
+
+            {!isCoach && (
+              <>
+                <div>
+                  <label htmlFor="gender" className="block text-sm font-medium text-gray-400 mb-2">
                     Sexe
                   </label>
                   <select
@@ -162,17 +189,17 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
                     name="gender"
                     value={profile.gender || ''}
                     onChange={(e) => handleChange('gender', e.target.value)}
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] transition-colors"
                   >
-                    <option value="">Sélectionner</option>
-                    <option value="male">Homme</option>
-                    <option value="female">Femme</option>
-                    <option value="other">Autre</option>
+                    <option value="" className="bg-[#0e131f] text-gray-400">Sélectionner</option>
+                    <option value="male" className="bg-[#0e131f] text-white">Homme</option>
+                    <option value="female" className="bg-[#0e131f] text-white">Femme</option>
+                    <option value="other" className="bg-[#0e131f] text-white">Autre</option>
                   </select>
                 </div>
 
-                <div className="col-span-6 sm:col-span-2">
-                  <label htmlFor="age" className="block text-sm font-medium text-gray-700">
+                <div>
+                  <label htmlFor="age" className="block text-sm font-medium text-gray-400 mb-2">
                     Âge
                   </label>
                   <input
@@ -180,13 +207,14 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
                     name="age"
                     id="age"
                     value={profile.age || ''}
-                    onChange={(e) => handleChange('age', parseInt(e.target.value))}
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-3 py-2 border"
+                    onChange={(e) => handleChange('age', parseInt(e.target.value) || '')}
+                    className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] focus:ring-1 focus:ring-[#ff5722] transition-colors"
+                    placeholder="Ex: 28"
                   />
                 </div>
 
-                <div className="col-span-6 sm:col-span-2">
-                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700">
+                <div>
+                  <label htmlFor="weight" className="block text-sm font-medium text-gray-400 mb-2">
                     Poids (kg)
                   </label>
                   <input
@@ -195,13 +223,14 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
                     name="weight"
                     id="weight"
                     value={profile.weight || ''}
-                    onChange={(e) => handleChange('weight', parseFloat(e.target.value))}
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-3 py-2 border"
+                    onChange={(e) => handleChange('weight', parseFloat(e.target.value) || '')}
+                    className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] focus:ring-1 focus:ring-[#ff5722] transition-colors"
+                    placeholder="Ex: 75.5"
                   />
                 </div>
 
-                <div className="col-span-6 sm:col-span-2">
-                  <label htmlFor="height" className="block text-sm font-medium text-gray-700">
+                <div>
+                  <label htmlFor="height" className="block text-sm font-medium text-gray-400 mb-2">
                     Taille (cm)
                   </label>
                   <input
@@ -209,33 +238,34 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
                     name="height"
                     id="height"
                     value={profile.height || ''}
-                    onChange={(e) => handleChange('height', parseFloat(e.target.value))}
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-3 py-2 border"
+                    onChange={(e) => handleChange('height', parseFloat(e.target.value) || '')}
+                    className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] focus:ring-1 focus:ring-[#ff5722] transition-colors"
+                    placeholder="Ex: 178"
                   />
                 </div>
 
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="goal" className="block text-sm font-medium text-gray-700">
-                    Objectif
+                <div>
+                  <label htmlFor="goal" className="block text-sm font-medium text-gray-400 mb-2">
+                    Objectif principal
                   </label>
                   <select
                     id="goal"
                     name="goal"
                     value={profile.goal || ''}
                     onChange={(e) => handleChange('goal', e.target.value)}
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] transition-colors"
                   >
-                    <option value="">Sélectionner</option>
-                    <option value="weight_loss">Perte de poids</option>
-                    <option value="muscle_gain">Prise de masse musculaire</option>
-                    <option value="maintenance">Maintien</option>
-                    <option value="strength">Force</option>
-                    <option value="endurance">Endurance</option>
+                    <option value="" className="bg-[#0e131f] text-gray-400">Sélectionner</option>
+                    <option value="weight_loss" className="bg-[#0e131f] text-white">Perte de poids</option>
+                    <option value="muscle_gain" className="bg-[#0e131f] text-white">Prise de masse</option>
+                    <option value="maintenance" className="bg-[#0e131f] text-white">Maintien</option>
+                    <option value="strength" className="bg-[#0e131f] text-white">Force & Puissance</option>
+                    <option value="endurance" className="bg-[#0e131f] text-white">Endurance cardio</option>
                   </select>
                 </div>
 
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="experience" className="block text-sm font-medium text-gray-700">
+                <div>
+                  <label htmlFor="experience" className="block text-sm font-medium text-gray-400 mb-2">
                     Niveau d'expérience
                   </label>
                   <select
@@ -243,38 +273,49 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
                     name="experience"
                     value={profile.experience || ''}
                     onChange={(e) => handleChange('experience', e.target.value)}
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="w-full bg-[#0e131f] border border-[#1e293b] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#ff5722] transition-colors"
                   >
-                    <option value="">Sélectionner</option>
-                    <option value="beginner">Débutant</option>
-                    <option value="intermediate">Intermédiaire</option>
-                    <option value="advanced">Avancé</option>
+                    <option value="" className="bg-[#0e131f] text-gray-400">Sélectionner</option>
+                    <option value="beginner" className="bg-[#0e131f] text-white">Débutant</option>
+                    <option value="intermediate" className="bg-[#0e131f] text-white">Intermédiaire</option>
+                    <option value="advanced" className="bg-[#0e131f] text-white">Avancé</option>
                   </select>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => router.push('/dashboard')}
-            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={() => router.push(isCoach ? '/coach' : '/dashboard')}
+            className="px-6 py-2.5 bg-transparent border border-[#1e293b] text-gray-300 font-semibold rounded-lg hover:bg-white/5 transition-all text-sm"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="px-6 py-2.5 bg-[#ff5722] hover:bg-[#e64a19] text-white font-semibold rounded-lg shadow-md transition-all text-sm disabled:opacity-50 flex items-center justify-center min-w-[120px]"
           >
-            {saving ? 'Enregistrement...' : 'Enregistrer'}
+            {saving ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                Sauvegarde...
+              </span>
+            ) : (
+              'Enregistrer'
+            )}
           </button>
         </div>
 
         {message && (
-          <div className={`mt-4 p-4 rounded-md ${message.includes('succès') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+          <div className={`p-4 rounded-lg text-center font-semibold text-sm transition-all border ${
+            message.includes('succès')
+              ? 'bg-[#d4ff00]/10 text-[#d4ff00] border-[#d4ff00]/30 shadow-[0_0_15px_rgba(212,255,0,0.05)]'
+              : 'bg-[#ff5722]/10 text-[#ff5722] border-[#ff5722]/30 shadow-[0_0_15px_rgba(255,87,34,0.05)]'
+          }`}>
             {message}
           </div>
         )}
